@@ -66,7 +66,7 @@ function init(){
 				if(C().progress.pressedEnter) C().goTimer--;
 			}
 			
-			//if(C().goTimer==-C().ghostlyLimit) C().progress.dying=true;
+			if(C().goTimer<=-C().ghostlyLimit) C().progress.dying=true;
 			
 			if(C().progress.dying){
 				C().ghostX+=200;
@@ -116,25 +116,38 @@ function init(){
 			C().X+=C().speed;
 			
 			// Draw ground
-			if(in_castle=Math.ceil(C().level / 4)==1){
-				for(var y=0;y<(last=Math.ceil(C().size.height / (C().zoom * 5)));y++){for(var x=0;x<(C().size.width / (C().zoom * 5)) + 1;x++){
-					D().drawImage(
-						C().sprites,
-						20,
-						5,
-						5,
-						5,
-						Math.floor(5 * x * C().zoom - (C().X % (5 * C().zoom))),
-						5 * y * C().zoom,
-						5 * C().zoom,
-						5 * C().zoom
-					);
-				}}
-			}
-			for(i=0;i<(C().size.width / (C().zoom * 5)) + 1;i++){
+			var in_castle=C().castle_levels.indexOf(Math.ceil((C().level + 1) / 4))!=-1;
+			D().globalAlpha=C().opacity;
+			for(var y=0;y<(last=Math.ceil(C().size.height / (C().zoom * 5)));y++){for(var x=0;x<(C().size.width / (C().zoom * 5)) + 1;x++){
 				D().drawImage(
 					C().sprites,
-					in_castle ? 25 : 20,
+					20,
+					5,
+					5,
+					5,
+					Math.floor(5 * x * C().zoom - (C().X % (5 * C().zoom))),
+					5 * y * C().zoom,
+					5 * C().zoom,
+					5 * C().zoom
+				);
+			}}
+			for(i=0;i<(C().size.width / (C().zoom * 5)) + 1;i++){
+				D().globalAlpha=1;
+				D().drawImage(
+					C().sprites,
+					20,
+					0,
+					5,
+					5,
+					Math.floor(5 * i * C().zoom - (C().X % (5 * C().zoom))),
+					C().size.height - (5 * C().zoom),
+					5 * C().zoom,
+					5 * C().zoom
+				);
+				D().globalAlpha=C().opacity;
+				D().drawImage(
+					C().sprites,
+					25,
 					0,
 					5,
 					5,
@@ -144,6 +157,16 @@ function init(){
 					5 * C().zoom
 				);
 			}
+			D().globalAlpha=1;
+			
+			if(C().opacity > 1) C().opacity=1;
+			if(C().opacity < 0) C().opacity=0;
+			
+			if(in_castle && C().opacity < 1)
+				C().opacity+=0.01;
+			
+			if(!in_castle && C().opacity > 0)
+				C().opacity-=0.01;
 			
 			// Draw ghostly presence
 			D().fillStyle='rgba(0,0,0,' + ((1 / (C().ghostlyLimit / 2 / -(C().goTimer - 0))) / 2) + ')';
@@ -201,7 +224,7 @@ function init(){
 			);
 			
 			// Draw text to write
-			if(C().progress.pressedEnter && C().X >= 1280 && !C().progress.inBetween){
+			if(C().progress.pressedEnter && C().X >= 1280 && !C().progress.inBetween && !C().progress.dying){
 				D().fillStyle='#FFF';
 				D().font='48px Courier New';
 				D().textAlign='center';
@@ -239,13 +262,24 @@ function init(){
 				D().fillStyle='#FFF';
 				D().textAlign='left';
 				D().font='24px Courier New';
-				var lD=Math.ceil(C().level / 4);
-				var lN=C().level % 4;
-				D().textAlign='left';
+				var lD=Math.ceil((C().level + 1) / 4);
+				var lN=(C().level % 4);
 				D().fillText(
 					lD + '-' + lN,
 					4,
 					20
+				);
+			}
+			
+			// Draw Game Over
+			if(C().ghostX > C().size.width * 2){
+				D().fillStyle='#F00';
+				D().textAlign='center';
+				D().font='48px Courier New';
+				D().fillText(
+					'Game Over',
+					C().size.width / 2,
+					200
 				);
 			}
 		},
@@ -285,7 +319,13 @@ function init(){
 		
 		error:false,
 		
+		opacity:0,
+		
 		ghostX:0,
+		
+		castle_levels:[
+			2
+		],
 		
 		progress:{
 			pressedEnter:false,
@@ -322,12 +362,10 @@ function init(){
 		if(!C().progress.pressedEnter && e.keyCode==13){
 			C().progress.pressedEnter=true;
 			C().level++;
-		}
-		
-		if(!C().progress.pressedEnter){
-			C().error=false;
 			return;
 		}
+		
+		if(!C().progress.pressedEnter) return;
 		
 		if(!C().progress.inBetween){
 			if(C().X >= 1280 && C().phrases[C().level - 1].substring(C().currentChar,C().currentChar + 1)==e.key){
@@ -343,8 +381,10 @@ function init(){
 				}
 				C().goTimer%=10;
 			}else{
-				C().error=true;
-				C().goTimer-=5;
+				if(e.key.length==1){
+					C().error=true;
+					C().goTimer-=5;
+				}
 			}
 		}
 	};
