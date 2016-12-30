@@ -14,11 +14,20 @@ var Canvas={
 		C().go=
 			// If you've just pressed enter after the title screen
 			C().progress.pressedEnter && C().X < 1280
+			||
+			// If you're done typing and haven't gotten to your next place yet
+			C().progress.inBetween && C().X < C().progress.gotoX
 		;
-		if(C().speed > 0)
+		if(!C().go) C().progress.inBetween=false;
+		if(C().speed > 0){
+			if(C().goTimer < 0)
+				C().goTimer=0;
 			C().goTimer++;
-		else
-			C().goTimer=0;
+		}else{
+			C().goTimer--;
+			if(C().goTimer > 0)
+				C().goTimer=0;
+		}
 		
 		
 		
@@ -49,13 +58,13 @@ var Canvas={
 		// Step
 		if(C().go){
 			C().speed+=C().Xa;
-			if(C().speed > C().speedLimit) C().speed=C().speedLimit;
 		}else{
 			if(C().speed >= C().Xa)
 				C().speed-=C().Xa;
 			else
 				C().speed=0;
 		}
+		if(C().speed > C().speedLimit) C().speed=C().speedLimit;
 		C().X+=C().speed;
 		
 		// Draw ground
@@ -103,6 +112,41 @@ var Canvas={
 			(C().size.width / 2) - C().X,
 			300
 		);
+		
+		// Draw text to write
+		if(C().progress.pressedEnter && C().X >= 1280 && !C().progress.inBetween){
+			D().fillStyle='#FFF';
+			D().font='48px Courier New';
+			D().textAlign='center';
+			D().fillText(
+			C().phrases[C().level - 1],
+				(C().size.width / 2),
+				100,
+				C().size.width - 200
+			);
+			D().fillStyle='#FF0';
+			D().fillText(
+				C().phrases[C().level - 1].substring(0,C().currentChar) + writeTimes(C().phrases[C().level - 1].length - C().currentChar,' '),
+				(C().size.width / 2),
+				100,
+				C().size.width - 200
+			);
+		}
+		
+		// Draw level HUD
+		if(C().level > 0){
+			D().fillStyle='#FFF';
+			D().textAlign='left';
+			D().font='24px Courier New';
+			var lD=Math.ceil(C().level / 4);
+			var lN=C().level % 4;
+			D().textAlign='left';
+			D().fillText(
+				lD + '-' + lN,
+				4,
+				20
+			);
+		}
 	},
 	
 	resize:function(){
@@ -134,9 +178,14 @@ var Canvas={
 	go:false,
 	goTimer:0,
 	
+	currentChar:0,
+	
 	progress:{
 		pressedEnter:false,
+		inBetween:false,
+		gotoX:0,
 	},
+	level:0,
 	
 	phrases:[
 		'Mario jumps high.',
@@ -188,14 +237,58 @@ function B(){return window.Backgrounds;}
 function init(){
 	C().init();
 	C().stepInterval=setInterval(function(){
-		//if()
 		C().step();
 	},1000 / C().FPS);
 	window.addEventListener('resize',function(){
 		C().resize();
 	});
-	window.addEventListener('keydown',function(e){
-		if(!C().progress.pressedEnter)
-			C().progress.pressedEnter=e.keyCode==13;
-	});
+	window.onkeydown=function(e){
+		if(e.keyCode==8) e.preventDefault();
+		
+		if(!C().progress.pressedEnter && e.keyCode==13){
+			C().progress.pressedEnter=true;
+			C().level++;
+		}
+		
+		if(C().X >= 1280 && C().phrases[C().level - 1].substring(C().currentChar,C().currentChar + 1)==e.key){
+			C().currentChar++;
+			C().speed+=C().speedLimit;
+			if(C().currentChar==C().phrases[C().level - 1].length){
+				C().go=true;
+				C().currentChar=0;
+				C().progress.inBetween=true;
+				C().progress.gotoX=C().X + 1280;
+				C().level++;
+			}
+		}
+	};
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Useful functions
+
+function writeTimes(x,str){
+	var ret='';
+	for(var i=0;i<x;i++){
+		ret+=str;
+	}
+	return ret;
 }
