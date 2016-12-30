@@ -71,8 +71,12 @@ function init(){
 			if(C().progress.dying){
 				C().ghostX+=200;
 				if(C().ghostX > C().size.width * 3){
+					window.level=C().level;
 					clearInterval(C().stepInterval);
-					setTimeout(init,1000);
+					setTimeout(function(){
+						init();
+						C().level=window.level;
+					},1000);
 					return;
 				}
 			}
@@ -116,7 +120,16 @@ function init(){
 			C().X+=C().speed;
 			
 			// Draw ground
-			var in_castle=C().castle_levels.indexOf(Math.ceil((C().level + 1) / 4))!=-1;
+			if(C().opacity > 1) C().opacity=1;
+			if(C().opacity < 0) C().opacity=0;
+			
+			if(in_castle && C().opacity < 1)
+				C().opacity+=0.01;
+			
+			if(!in_castle && C().opacity > 0)
+				C().opacity-=0.01;
+			
+			var in_castle=C().castle_levels.indexOf(Math.ceil((C().level) / 4))!=-1;
 			D().globalAlpha=C().opacity;
 			for(var y=0;y<(last=Math.ceil(C().size.height / (C().zoom * 5)));y++){for(var x=0;x<(C().size.width / (C().zoom * 5)) + 1;x++){
 				D().drawImage(
@@ -158,15 +171,6 @@ function init(){
 				);
 			}
 			D().globalAlpha=1;
-			
-			if(C().opacity > 1) C().opacity=1;
-			if(C().opacity < 0) C().opacity=0;
-			
-			if(in_castle && C().opacity < 1)
-				C().opacity+=0.01;
-			
-			if(!in_castle && C().opacity > 0)
-				C().opacity-=0.01;
 			
 			// Draw ghostly presence
 			D().fillStyle='rgba(0,0,0,' + ((1 / (C().ghostlyLimit / 2 / -(C().goTimer - 0))) / 2) + ')';
@@ -258,12 +262,12 @@ function init(){
 			}
 			
 			// Draw level HUD
-			if(C().level > 0){
+			if(C().progress.pressedEnter){
 				D().fillStyle='#FFF';
 				D().textAlign='left';
 				D().font='24px Courier New';
-				var lD=Math.ceil((C().level + 1) / 4);
-				var lN=(C().level % 4);
+				var lD=Math.ceil((C().level) / 4);
+				var lN=((C().level - 1) % 4) + 1;
 				D().fillText(
 					lD + '-' + lN,
 					4,
@@ -340,11 +344,26 @@ function init(){
 			'Luigi jumps higher.',
 			'Mario is jealous.',
 			'Luigi is scared.',
+			
 			'Why is Luigi scared?',
 			'Luigi is sick.',
 			'Mario is sicker.',
+			'His eyes burn red.',
+			
 			'Where is Luigi buried?',
-			'Nobody knows, except for me.',
+			'Nobody knows.',
+			'Except for Mario...',
+			'Mario will show you.',
+			
+			'There will be no fireworks,',
+			'And there will be no parades',
+			'At the end of our journey;',
+			'...',
+			
+			'Do you have a secret?',
+			'I do.',
+			'Would you like to hear it?',
+			'Here it goes:',
 		]
 	};
 	C().init();
@@ -361,7 +380,7 @@ function init(){
 		
 		if(!C().progress.pressedEnter && e.keyCode==13){
 			C().progress.pressedEnter=true;
-			C().level++;
+			if(C().level==0) C().level++;
 			return;
 		}
 		
