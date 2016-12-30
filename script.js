@@ -44,6 +44,23 @@ function init(){
 			C().resize();
 			C().sprites=new Image();
 			C().sprites.src='sprites.png';
+			
+			for(var i in C().sounds){
+				C().sounds[i]=new Howl({
+					src:C().sounds[i]
+				});
+			}
+			
+			C().sounds=[
+				new Howl({
+					src:'song.wav',
+					loop:true,
+					autoplay:true
+				}),
+				new Howl({
+					src:'fail.wav'
+				})
+			];
 		},
 		
 		step:function(){
@@ -323,6 +340,8 @@ function init(){
 		opacity:0,
 		
 		ghostX:0,
+		
+		sounds:['song.wav','fail.wav'],
 		
 		castle_levels:[
 			2
