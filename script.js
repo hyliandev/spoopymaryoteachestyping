@@ -81,7 +81,7 @@ function init(){
 					C().goTimer=0;
 				C().goTimer++;
 			}else{
-				if(C().goTimer > 0)
+				if(C().goTimer > 0 && C().level<C().phrases.length)
 					C().goTimer=0;
 				if(C().progress.pressedEnter) C().goTimer--;
 			}
@@ -152,12 +152,6 @@ function init(){
 			if(C().opacity > 1) C().opacity=1;
 			if(C().opacity < 0) C().opacity=0;
 			
-			if(in_castle && C().opacity < 1)
-				C().opacity+=0.01;
-			
-			if(!in_castle && C().opacity > 0)
-				C().opacity-=0.01;
-			
 			var in_castle=C().castle_levels.indexOf(Math.ceil((C().level) / 4))!=-1;
 			D().globalAlpha=C().opacity;
 			for(var y=0;y<(last=Math.ceil(C().size.height / (C().zoom * 5)));y++){for(var x=0;x<(C().size.width / (C().zoom * 5)) + 1;x++){
@@ -201,6 +195,12 @@ function init(){
 			}
 			D().globalAlpha=1;
 			
+			if(in_castle && C().opacity < 1)
+				C().opacity+=0.01;
+			
+			if(!in_castle && C().opacity > 0)
+				C().opacity-=0.01;
+			
 			// Draw ghostly presence
 			D().fillStyle='rgba(0,0,0,' + ((1 / (C().ghostlyLimit / 2 / -(C().goTimer - 0))) / 2) + ')';
 			D().fillRect(
@@ -215,7 +215,7 @@ function init(){
 				D().drawImage(
 					C().sprites,
 					(
-						C().goTimer % 10 < 5 ? 0 : 5
+						C().speed==0 ? 0 : (C().goTimer % 10 < 5 ? 0 : 5)
 					),
 					0,
 					5,
@@ -307,7 +307,7 @@ function init(){
 				D().textAlign='center';
 				D().font='48px Courier New';
 				D().fillText(
-					'You Died',
+					C().level>=C().phrases.length-1? 'The End.' : 'You Died',
 					C().size.width / 2,
 					200
 				);
@@ -356,7 +356,7 @@ function init(){
 		sounds:null,
 		
 		castle_levels:[
-			2
+			2,4
 		],
 		
 		progress:{
@@ -424,7 +424,10 @@ function init(){
 					C().progress.gotoX=C().X + (C().size.width / 2);
 					C().level++;
 				}
-				C().goTimer%=10;
+				if(C().level<C().phrases.length-1)
+					C().goTimer%=10;
+				else
+					C().goTimer=100;
 			}else{
 				if(e.key.length==1){
 					C().error=true;
