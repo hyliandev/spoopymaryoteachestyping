@@ -235,15 +235,13 @@ function init(){
 				D().fillText(
 				C().phrases[C().level - 1],
 					(C().size.width / 2),
-					100,
-					C().size.width - 200
+					100
 				);
 				D().fillStyle='#FF0';
 				D().fillText(
 					C().phrases[C().level - 1].substring(0,C().currentChar) + writeTimes(C().phrases[C().level - 1].length - C().currentChar,' '),
 					(C().size.width / 2),
-					100,
-					C().size.width - 200
+					100
 				);
 				if(C().error){
 					D().fillStyle='#F00';
@@ -255,8 +253,7 @@ function init(){
 						,
 						//
 						(C().size.width / 2),
-						100,
-						C().size.width - 200
+						100
 					);
 				}
 			}
@@ -340,30 +337,28 @@ function init(){
 		level:0,
 		
 		phrases:[
+			// 1
 			'Mario jumps high.',
 			'Luigi jumps higher.',
-			'Mario is jealous.',
-			'Luigi is scared.',
-			
-			'Why is Luigi scared?',
-			'Luigi is sick.',
-			'Mario is sicker.',
-			'His eyes burn red.',
-			
-			'Where is Luigi buried?',
-			'Nobody knows.',
-			'Except for Mario...',
-			'Mario will show you.',
-			
-			'There will be no fireworks,',
-			'And there will be no parades',
-			'At the end of our journey;',
-			'...',
-			
-			'Do you have a secret?',
-			'I do.',
-			'Would you like to hear it?',
-			'Here it goes:',
+			'Mario is scared.',
+			'Luigi is jealous.',
+			// 2
+			'Princess Peach rules the kingdom.',
+			'Bowser tries to usurp it.',
+			'He turns the toads into blocks.',
+			'Are you comfortable breaking them?',
+			// 3
+			'Try as you might, Bowser will return.',
+			'Rescue her again, she will just go back.',
+			'Such is life; might as well face it.',
+			'After all, where did Bowser Jr. come from?',
+			// 4
+			'Do you know where Luigi is buried?',
+			'Or do you even remember anymore?',
+			'Ashes to ashes, dust to dust',
+			'Why not just go with him?',
+			// 5
+			'               Why even bother.               '
 		]
 	};
 	C().init();
