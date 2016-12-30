@@ -10,6 +10,25 @@ var Canvas={
 	},
 	
 	step:function(){
+		// Whether or not to go
+		C().go=
+			// If you've just pressed enter after the title screen
+			C().progress.pressedEnter && C().X < 1280
+		;
+		if(C().speed > 0)
+			C().goTimer++;
+		else
+			C().goTimer=0;
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		// Clear screen
 		D().clearRect(
 			0,
@@ -18,11 +37,72 @@ var Canvas={
 			C().e.height
 		);
 		
+		// Pixel perfect
+		D().webkitImageSmoothingEnabled=false;
+		D().mozImageSmoothingEnabled=false;
+		D().msImageSmoothingEnabled=false;
+		D().imageSmoothingEnabled=false;
+		
 		// Draw bg
 		B()[0]();
 		
 		// Step
-		C().X++;
+		if(C().go){
+			C().speed+=C().Xa;
+			if(C().speed > C().speedLimit) C().speed=C().speedLimit;
+		}else{
+			if(C().speed >= C().Xa)
+				C().speed-=C().Xa;
+			else
+				C().speed=0;
+		}
+		C().X+=C().speed;
+		
+		// Draw ground
+		for(i=0;i<(C().size.width / C().zoom);i++){
+			D().drawImage(
+				C().sprites,
+				20,
+				0,
+				5,
+				5,
+				5 * i * C().zoom,
+				C().size.height - (5 * C().zoom),
+				5 * C().zoom,
+				5 * C().zoom
+			);
+		}
+		
+		// Draw mario
+		D().drawImage(
+			C().sprites,
+			(
+				C().goTimer % 10 < 5 ? 0 : 5
+			),
+			0,
+			5,
+			10,
+			(C().size.width - (5 * C().zoom)) / 2,
+			C().size.height - (15 * C().zoom),
+			5 * C().zoom,
+			10 * C().zoom
+		);
+		
+		// Draw title
+		D().fillStyle='#FFF';
+		D().font='48px Courier New';
+		D().textAlign='center';
+		D().fillText(
+			'Spoopy Maryo Teaches Typing',
+			(C().size.width / 2) - C().X,
+			100
+		);
+		D().font='24px Courier New';
+		D().fillText(
+			'Press Enter',
+			(C().size.width / 2) - C().X,
+			300
+		);
 	},
 	
 	resize:function(){
@@ -44,8 +124,31 @@ var Canvas={
 		height:720
 	},
 	sprites:null,
+	zoom:10,
 	
-	X:0
+	X:0,
+	Xa:0.15,
+	speed:0,
+	speedLimit:5,
+	
+	go:false,
+	goTimer:0,
+	
+	progress:{
+		pressedEnter:false,
+	},
+	
+	phrases:[
+		'Mario jumps high.',
+		'Luigi jumps higher.',
+		'Mario is jealous.',
+		'Luigi is scared.',
+		'Why is Luigi scared?',
+		'Luigi is sick.',
+		'Mario is sicker.',
+		'Where is Luigi buried?',
+		'Nobody knows, except for me.',
+	]
 };
 function C(){return window.Canvas;}
 function D(){return C().context;}
@@ -67,7 +170,7 @@ var Backgrounds=[
 		}
 		for(var i in window.stars){
 			var star=window.stars[i];
-			D().fillStyle='#FFFFFF';
+			D().fillStyle='rgba(255,255,200,0.5)';
 			D().fillRect(
 				((star[0] - C().X - C().size.width) % C().size.width) + C().size.width,
 				star[1],
@@ -90,5 +193,9 @@ function init(){
 	},1000 / C().FPS);
 	window.addEventListener('resize',function(){
 		C().resize();
+	});
+	window.addEventListener('keydown',function(e){
+		if(!C().progress.pressedEnter)
+			C().progress.pressedEnter=e.keyCode==13;
 	});
 }
