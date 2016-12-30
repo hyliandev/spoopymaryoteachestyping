@@ -59,6 +59,9 @@ function init(){
 				}),
 				new Howl({
 					src:'fail.wav'
+				}),
+				new Howl({
+					src:'death.wav'
 				})
 			];
 		},
@@ -83,18 +86,27 @@ function init(){
 				if(C().progress.pressedEnter) C().goTimer--;
 			}
 			
-			if(C().goTimer<=-C().ghostlyLimit) C().progress.dying=true;
+			if(C().goTimer<=-C().ghostlyLimit){
+				C().progress.dying=true;
+				C().sounds[0].stop();
+				C().sounds[2].play();
+			}
 			
 			if(C().progress.dying){
 				C().ghostX+=200;
 				if(C().ghostX > C().size.width * 3){
-					window.level=C().level;
-					clearInterval(C().stepInterval);
-					setTimeout(function(){
-						init();
-						C().level=window.level;
-					},1000);
-					return;
+					if(C().level<C().phrases.length-1){
+						window.level=C().level;
+						clearInterval(C().stepInterval);
+						setTimeout(function(){
+							C().sounds[2].stop();
+							init();
+							C().level=window.level;
+						},1000);
+						return;
+					}else{
+						C().sounds[2].stop();
+					}
 				}
 			}
 			
@@ -295,7 +307,7 @@ function init(){
 				D().textAlign='center';
 				D().font='48px Courier New';
 				D().fillText(
-					'Game Over',
+					'You Died',
 					C().size.width / 2,
 					200
 				);
@@ -341,7 +353,7 @@ function init(){
 		
 		ghostX:0,
 		
-		sounds:['song.wav','fail.wav'],
+		sounds:null,
 		
 		castle_levels:[
 			2
@@ -359,8 +371,8 @@ function init(){
 			// 1
 			'Mario jumps high.',
 			'Luigi jumps higher.',
-			'Mario is scared.',
-			'Luigi is jealous.',
+			'Luigi is scared.',
+			'Mario is jealous.',
 			// 2
 			'Princess Peach rules the kingdom.',
 			'Bowser tries to usurp it.',
@@ -417,6 +429,7 @@ function init(){
 				if(e.key.length==1){
 					C().error=true;
 					C().goTimer-=5;
+					C().sounds[1].play();
 				}
 			}
 		}
