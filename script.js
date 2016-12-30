@@ -66,7 +66,7 @@ function init(){
 				if(C().progress.pressedEnter) C().goTimer--;
 			}
 			
-			if(C().goTimer==-C().ghostlyLimit) C().progress.dying=true;
+			//if(C().goTimer==-C().ghostlyLimit) C().progress.dying=true;
 			
 			if(C().progress.dying){
 				C().ghostX+=200;
@@ -218,6 +218,20 @@ function init(){
 					100,
 					C().size.width - 200
 				);
+				if(C().error){
+					D().fillStyle='#F00';
+					D().fillText(
+						//
+						writeTimes(C().currentChar - (C().currentChar==C().phrases[C().level - 1].length-1 ? 0 : 1),' ') +
+						C().phrases[C().level - 1].substring(C().currentChar,C().currentChar + 1) +
+						writeTimes(C().phrases[C().level - 1].length - C().currentChar - (C().currentChar==0 ? 1 : 2),' ')
+						,
+						//
+						(C().size.width / 2),
+						100,
+						C().size.width - 200
+					);
+				}
 			}
 			
 			// Draw level HUD
@@ -267,7 +281,9 @@ function init(){
 		
 		currentChar:0,
 		
-		ghostlyLimit:100,
+		ghostlyLimit:25,
+		
+		error:false,
 		
 		ghostX:0,
 		
@@ -308,12 +324,16 @@ function init(){
 			C().level++;
 		}
 		
-		if(!C().progress.pressedEnter) return;
+		if(!C().progress.pressedEnter){
+			C().error=false;
+			return;
+		}
 		
 		if(!C().progress.inBetween){
 			if(C().X >= 1280 && C().phrases[C().level - 1].substring(C().currentChar,C().currentChar + 1)==e.key){
 				C().currentChar++;
 				C().speed+=C().speedLimit;
+				C().error=false;
 				if(C().currentChar==C().phrases[C().level - 1].length){
 					C().go=true;
 					C().currentChar=0;
@@ -323,6 +343,7 @@ function init(){
 				}
 				C().goTimer%=10;
 			}else{
+				C().error=true;
 				C().goTimer-=5;
 			}
 		}
